@@ -78,4 +78,29 @@ const save_message_handler = async (req, res) =>
   res.sendStatus(200);
 };
 
-module.exports = { chat_box_handler, save_message_handler }
+const delete_message_handler = async (req, res) =>
+{
+  const refresh_token = req.cookies?.jwt;
+  if(!refresh_token) return res.sendStatus(401);
+
+  const { receiver_name, message_id } = req.params;
+  if(!receiver_name || !message_id) return res.sendStatus(400);
+
+  const sender = await users.findOne({ refresh_token });
+  const sender_connections = sender.connections;
+
+  let receiver = sender_connections.find(connection => connection.username === receiver_name);
+  const updated_receiver_messages = receiver.messages.filter(message => message.id != message_id);
+
+  receiver.messages = updated_receiver_messages;
+  const filtered_sender_connections = sender_connections.filter(connection => connection.username != receiver_name);
+  const updated_sender_connections = [...filtered_sender_connections, receiver];
+
+  sender.connections = updated_sender_connections;
+
+  await sender.save();
+
+  return res.sendStatus(200);
+};
+
+module.exports = { chat_box_handler, save_message_handler, delete_message_handler }
