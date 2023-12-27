@@ -8,7 +8,7 @@ const sign_up_handler = async (req, res) =>
   if(!username || !password) return res.sendStatus(400);
 
   const exist = await users.findOne({ username: username });
-  if(exist) return res.sendStatus(400);
+  if(exist) return res.sendStatus(409);
 
   try
   {

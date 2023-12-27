@@ -9,12 +9,12 @@ const sign_in_handler = async (req, res) =>
   if(!username || !password) return res.sendStatus(400);  
 
   const exist = await users.findOne({ username: username });
-  if(!exist) return res.sendStatus(400);  
+  if(!exist) return res.sendStatus(401);  
 
   try
   {
     const match = await bcrypt.compare(password, exist.password);
-    if(!match) return res.sendStatus(400);
+    if(!match) return res.sendStatus(401);
 
     const refresh_token = jwt.sign(
       {username},
